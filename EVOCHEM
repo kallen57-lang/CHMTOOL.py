@@ -1,0 +1,126 @@
+def show_menu():
+    print("\n--- CHEM TOOLKIT ---")
+    print("1: Element Quick Data")
+    print("2: Moles <=> Mass")
+    print("3: Gas Laws (PV=nRT)")
+    print("4: pH / pOH / Ions")
+    print("5: Thermochemistry")
+    print("0: Exit")
+    return int(input("Select option: "))
+<br><br><br>
+def element_data():
+    elements = {
+        "H": ("Hydrogen", 1.008, "1s1"),
+        "He": ("Helium", 4.003, "1s2"),
+        "C": ("Carbon", 12.011, "[He] 2s2 2p2"),
+        "N": ("Nitrogen", 14.007, "[He] 2s2 2p3"),
+        "O": ("Oxygen", 15.999, "[He] 2s2 2p4"),
+        "Na": ("Sodium", 22.990, "[Ne] 3s1"),
+        "Mg": ("Magnesium", 24.305, "[Ne] 3s2"),
+        "Cl": ("Chlorine", 35.45, "[Ne] 3s2 3p5"),
+        "K": ("Potassium", 39.098, "[Ar] 4s1"),
+        "Ca": ("Calcium", 40.078, "[Ar] 4s2")
+    }
+<br><br>
+    sym = input("Enter Element Symbol (e.g. O, Na): ").strip().title()
+    if sym in elements:
+        name, mass, config = elements[sym]
+        print("\n" + name)
+        print("Mass:", mass, "g/mol")
+        print("Config:", config)
+    else:
+        print("Element not in quick-database.")
+<br><br><br>
+def moles_mass():
+    print("\n1: Mass to Moles\n2: Moles to Mass")
+    choice = int(input("Choice: "))
+    if choice == 1:
+        mass = float(input("Enter Mass (g): "))
+        mm = float(input("Molar Mass (g/mol): "))
+        print("Moles:", round(mass / mm, 4), "mol")
+    elif choice == 2:
+        moles = float(input("Enter Moles (mol): "))
+        mm = float(input("Molar Mass (g/mol): "))
+        print("Mass:", round(moles * mm, 4), "g")
+    else:
+        print("Invalid choice.")
+<br><br><br>
+def gas_laws():
+    print("\nSolve for missing value (Enter 0 for unknown)")
+    P = float(input("P (atm): "))
+    V = float(input("V (L): "))
+    n = float(input("n (mol): "))
+    T = float(input("T (K): "))
+    R = 0.08206
+<br><br>
+    if P == 0:
+        print("P =", round((n * R * T) / V, 4), "atm")
+    elif V == 0:
+        print("V =", round((n * R * T) / P, 4), "L")
+    elif n == 0:
+        print("n =", round((P * V) / (R * T), 4), "mol")
+    elif T == 0:
+        print("T =", round((P * V) / (n * R), 2), "K")
+    else:
+        print("All values are known; no unknown to solve.")
+<br><br><br>
+def ph_calc():
+    import math
+<br><br>
+    print("\n1: Given pH\n2: Given [H+]")
+    choice = int(input("Choice: "))
+<br><br>
+    if choice == 1:
+        ph = float(input("Enter pH: "))
+        poh = 14.0 - ph
+        h_ion = 10 ** (-ph)
+        oh_ion = 10 ** (-poh)
+    elif choice == 2:
+        h_ion = float(input("Enter [H+] (e.g. 1e-3): "))
+        if h_ion <= 0:
+            raise ValueError("Hydrogen concentration must be positive.")
+        ph = -math.log10(h_ion)
+        poh = 14.0 - ph
+        oh_ion = 10 ** (-poh)
+    else:
+        print("Invalid choice.")
+        return
+<br><br>
+    print("pH:", round(ph, 2))
+    print("pOH:", round(poh, 2))
+    print("[H+]:", "{:.2e}".format(h_ion))
+    print("[OH-]:", "{:.2e}".format(oh_ion))
+<br><br><br>
+def thermo():
+    print("\nSpecific Heat: q = m * c * dT")
+    m = float(input("Mass m (g): "))
+    c = float(input("Specific heat c (J/gC): "))
+    dT = float(input("Temp change dT (C): "))
+    q = m * c * dT
+    print("Heat energy q =", round(q, 2), "J")
+<br><br><br>
+while True:
+    try:
+        opt = show_menu()
+        if opt == 1:
+            element_data()
+        elif opt == 2:
+            moles_mass()
+        elif opt == 3:
+            gas_laws()
+        elif opt == 4:
+            ph_calc()
+        elif opt == 5:
+            thermo()
+        elif opt == 0:
+            break
+        else:
+            print("Invalid choice.")
+    except ValueError:
+        print("Error: invalid numeric input. Please try again.")
+    except ZeroDivisionError:
+        print("Error: division by zero. Check units or enter 0 for unknown.")
+    except Exception:
+        print("Error in calculation. Check units.")
+<br>
+<br>
