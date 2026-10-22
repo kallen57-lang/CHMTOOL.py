@@ -1,0 +1,52 @@
+from chemistry import element_data, gas_laws, moles_mass, ph_calc, thermo
+from conversions import unit_conversion
+from equations import balance_equation
+from phylogeny import phylogeny_tree
+
+
+def show_menu():
+    print("--- CHEM & BIO TOOLKIT ---")
+    print("1: Element Quick Data")
+    print("2: Moles <=> Mass")
+    print("3: Gas Laws (PV=nRT)")
+    print("4: pH / pOH / Ions")
+    print("5: Thermochemistry")
+    print("6: Unit Conversions")
+    print("7: Balance Chemical Equation")
+    print("8: DNA Phylogenetic Tree (UPGMA)")
+    print("0: Exit")
+    return int(input("Select option: "))
+
+
+def main():
+    while True:
+        try:
+            option = show_menu()
+            if option == 1:
+                element_data()
+            elif option == 2:
+                moles_mass()
+            elif option == 3:
+                gas_laws()
+            elif option == 4:
+                ph_calc()
+            elif option == 5:
+                thermo()
+            elif option == 6:
+                unit_conversion()
+            elif option == 7:
+                balance_equation()
+            elif option == 8:
+                phylogeny_tree()
+            elif option == 0:
+                break
+            else:
+                print("Invalid choice.")
+        except ValueError:
+            print("Error: invalid numeric input. Please try again.")
+        except ZeroDivisionError:
+            print("Error: division by zero. Check units or enter 0 for unknown.")
+
+
+if __name__ == "__main__":
+    main()
