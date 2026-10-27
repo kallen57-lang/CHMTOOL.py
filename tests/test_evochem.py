@@ -5,12 +5,56 @@ import subprocess
 import sys
 import unittest
 from unittest.mock import patch
+from types import SimpleNamespace
 
 
 SCRIPT = Path(__file__).resolve().parents[1] / "EVOCHEM"
 
 
 class EvochemTests(unittest.TestCase):
+    def load_tool(self, ti_system):
+        loader = importlib.machinery.SourceFileLoader("evochem", str(SCRIPT))
+        spec = importlib.util.spec_from_loader(loader.name, loader)
+        module = importlib.util.module_from_spec(spec)
+        with patch.dict(sys.modules, {"ti_system": ti_system}):
+            loader.exec_module(module)
+        return module
+
+    def test_evo_number_keys_need_no_enter(self):
+        for key, option in [(102, 0), (92, 1), (93, 2), (94, 3), (82, 4), (83, 5), (45, 0)]:
+            with self.subTest(key=key):
+                ti_system = SimpleNamespace(get_key=lambda wait: key, disp_clr=lambda: None)
+                module = self.load_tool(ti_system)
+                with patch("builtins.input", side_effect=AssertionError("Unexpected input")), patch("builtins.print"):
+                    self.assertEqual(module.show_menu(), option)
+
+    def test_evo_ignores_unrelated_keys(self):
+        key_stream = iter([105, 25, 0, 94])
+        module = self.load_tool(SimpleNamespace(get_key=lambda wait: next(key_stream), disp_clr=lambda: None))
+        with patch("builtins.input", side_effect=AssertionError("Unexpected input")), patch("builtins.print"):
+            self.assertEqual(module.show_menu(), 3)
+
+    def test_evo_submenus_ignore_unavailable_options(self):
+        key_stream = iter([45, 102, 83, 92])
+        module = self.load_tool(SimpleNamespace(get_key=lambda wait: next(key_stream), disp_clr=lambda: None))
+        with patch("builtins.input", side_effect=AssertionError("Unexpected input")), patch("builtins.print"):
+            self.assertEqual(module.menu_choice((1, 2), "Choice: "), 1)
+
+    def test_evo_calculation_and_return_to_menu(self):
+        from unittest.mock import Mock
+        # Main menu 2, submenu 1, any key to leave result, then 0 to exit.
+        get_key = Mock(side_effect=[93, 92, 105, 102])
+        clear = Mock()
+        module = self.load_tool(SimpleNamespace(get_key=get_key, disp_clr=clear))
+        with patch("builtins.input", side_effect=["18", "18"]) as typed, patch("builtins.print") as output:
+            module.main()
+        self.assertEqual(typed.call_count, 2)
+        output.assert_any_call("Moles:", 1.0, "mol")
+        output.assert_any_call("Any key: menu")
+        self.assertEqual(clear.call_count, 2)
+        self.assertEqual(get_key.call_count, 4)
+        self.assertTrue(all(call.args == (1,) for call in get_key.call_args_list))
+
     def run_tool(self, answers):
         result = subprocess.run(
             [sys.executable, str(SCRIPT)], input=answers,

@@ -1,4 +1,27 @@
+try:
+    from ti_system import get_key, disp_clr
+except ImportError:
+    # Desktop Python keeps the usual input-and-Enter behavior.
+    get_key = None
+    disp_clr = None
+
+
+def menu_choice(options, prompt):
+    if get_key is None:
+        return int(input(prompt))
+
+    # Evo key codes: 0, 1, 2, 3, 4, 5; CLEAR also exits the main menu.
+    keys = {102: 0, 92: 1, 93: 2, 94: 3, 82: 4, 83: 5, 45: 0}
+    print("Press a number key.")
+    while True:
+        key = get_key(1)
+        if key in keys and keys[key] in options:
+            return keys[key]
+
+
 def show_menu():
+    if disp_clr is not None:
+        disp_clr()
     print("\n--- CHEM TOOLKIT ---")
     print("1: Element Quick Data")
     print("2: Moles <=> Mass")
@@ -6,7 +29,7 @@ def show_menu():
     print("4: pH / pOH / Ions")
     print("5: Thermochemistry")
     print("0: Exit")
-    return int(input("Select option: "))
+    return menu_choice((0, 1, 2, 3, 4, 5), "Select option: ")
 
 def element_data():
     elements = {
@@ -33,7 +56,7 @@ def element_data():
 
 def moles_mass():
     print("\n1: Mass to Moles\n2: Moles to Mass")
-    choice = int(input("Choice: "))
+    choice = menu_choice((1, 2), "Choice: ")
     if choice == 1:
         mass = float(input("Enter Mass (g): "))
         mm = float(input("Molar Mass (g/mol): "))
@@ -73,7 +96,7 @@ def ph_calc():
     import math
 
     print("\n1: Given pH\n2: Given [H+]")
-    choice = int(input("Choice: "))
+    choice = menu_choice((1, 2), "Choice: ")
 
     if choice == 1:
         ph = float(input("Enter pH: "))
@@ -132,6 +155,14 @@ def main():
             print("\nGoodbye.")
             break
 
+        if get_key is not None:
+            print("Any key: menu")
+            try:
+                get_key(1)
+            except (EOFError, KeyboardInterrupt):
+                break
+
 
 if __name__ == "__main__":
     main()
+
