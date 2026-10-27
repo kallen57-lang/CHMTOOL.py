@@ -7,7 +7,7 @@ def show_menu():
     print("5: Thermochemistry")
     print("0: Exit")
     return int(input("Select option: "))
-<br><br><br>
+
 def element_data():
     elements = {
         "H": ("Hydrogen", 1.008, "1s1"),
@@ -21,7 +21,7 @@ def element_data():
         "K": ("Potassium", 39.098, "[Ar] 4s1"),
         "Ca": ("Calcium", 40.078, "[Ar] 4s2")
     }
-<br><br>
+
     sym = input("Enter Element Symbol (e.g. O, Na): ").strip().title()
     if sym in elements:
         name, mass, config = elements[sym]
@@ -30,7 +30,7 @@ def element_data():
         print("Config:", config)
     else:
         print("Element not in quick-database.")
-<br><br><br>
+
 def moles_mass():
     print("\n1: Mass to Moles\n2: Moles to Mass")
     choice = int(input("Choice: "))
@@ -44,7 +44,7 @@ def moles_mass():
         print("Mass:", round(moles * mm, 4), "g")
     else:
         print("Invalid choice.")
-<br><br><br>
+
 def gas_laws():
     print("\nSolve for missing value (Enter 0 for unknown)")
     P = float(input("P (atm): "))
@@ -52,7 +52,12 @@ def gas_laws():
     n = float(input("n (mol): "))
     T = float(input("T (K): "))
     R = 0.08206
-<br><br>
+
+    unknown_count = sum(value == 0 for value in (P, V, n, T))
+    if unknown_count > 1:
+        print("Enter exactly one unknown as 0.")
+        return
+
     if P == 0:
         print("P =", round((n * R * T) / V, 4), "atm")
     elif V == 0:
@@ -63,13 +68,13 @@ def gas_laws():
         print("T =", round((P * V) / (n * R), 2), "K")
     else:
         print("All values are known; no unknown to solve.")
-<br><br><br>
+
 def ph_calc():
     import math
-<br><br>
+
     print("\n1: Given pH\n2: Given [H+]")
     choice = int(input("Choice: "))
-<br><br>
+
     if choice == 1:
         ph = float(input("Enter pH: "))
         poh = 14.0 - ph
@@ -85,12 +90,12 @@ def ph_calc():
     else:
         print("Invalid choice.")
         return
-<br><br>
+
     print("pH:", round(ph, 2))
     print("pOH:", round(poh, 2))
     print("[H+]:", "{:.2e}".format(h_ion))
     print("[OH-]:", "{:.2e}".format(oh_ion))
-<br><br><br>
+
 def thermo():
     print("\nSpecific Heat: q = m * c * dT")
     m = float(input("Mass m (g): "))
@@ -98,29 +103,35 @@ def thermo():
     dT = float(input("Temp change dT (C): "))
     q = m * c * dT
     print("Heat energy q =", round(q, 2), "J")
-<br><br><br>
-while True:
-    try:
-        opt = show_menu()
-        if opt == 1:
-            element_data()
-        elif opt == 2:
-            moles_mass()
-        elif opt == 3:
-            gas_laws()
-        elif opt == 4:
-            ph_calc()
-        elif opt == 5:
-            thermo()
-        elif opt == 0:
+
+def main():
+    while True:
+        try:
+            opt = show_menu()
+            if opt == 1:
+                element_data()
+            elif opt == 2:
+                moles_mass()
+            elif opt == 3:
+                gas_laws()
+            elif opt == 4:
+                ph_calc()
+            elif opt == 5:
+                thermo()
+            elif opt == 0:
+                break
+            else:
+                print("Invalid choice.")
+        except ValueError:
+            print("Error: invalid numeric input. Please try again.")
+        except ZeroDivisionError:
+            print("Error: division by zero. Check units or enter 0 for unknown.")
+        except OverflowError:
+            print("Error: number too large. Check your input.")
+        except (EOFError, KeyboardInterrupt):
+            print("\nGoodbye.")
             break
-        else:
-            print("Invalid choice.")
-    except ValueError:
-        print("Error: invalid numeric input. Please try again.")
-    except ZeroDivisionError:
-        print("Error: division by zero. Check units or enter 0 for unknown.")
-    except Exception:
-        print("Error in calculation. Check units.")
-<br>
-<br>
+
+
+if __name__ == "__main__":
+    main()
